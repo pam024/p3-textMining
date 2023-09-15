@@ -16,7 +16,7 @@ class TextMining:
         reviews = []        
         reviews = os.listdir("./text/reviews")
 
-        self.random_reviews = random.sample(reviews, 100)
+        self.random_reviews = random.sample(reviews, 100)        
     
         return self.random_reviews
     

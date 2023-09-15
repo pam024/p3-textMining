@@ -29,7 +29,3 @@ class Preprocessor(MRJob):
 
     #     with open("output.txt" % self.identifier, 'w', encoding='utf-8') as file:
     #         file.write(f"{key}\t{value}\n")
-
-
-if __name__ == '__main__':
-    Preprocessor.run()
