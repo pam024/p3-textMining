@@ -27,7 +27,7 @@ if __name__ == '__main__':
     output_num = 0
     for file in sample_reviews:
         output_path = "".join(["./output/", str(output_num), ".txt"])
-        print(output_path)
+        #print(output_path)
         run_mrjob(file, output_path)
         # thread = multiprocessing.Process(target=run_mrjob, args=(file, output_path))
         # threads.append(thread)
