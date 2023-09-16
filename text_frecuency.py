@@ -6,15 +6,19 @@ import math
 class TextMining:
     
     def __init__(self, path_files):        
+        # self.random_reviews = os.listdir(path_files)[1:]
         self.random_reviews = os.listdir(path_files)
         self.tf = []
         self.df = []
         self.idf = []
         self.tf_idf_list = []
+        self.dir = path_files
+        # self.process_query = process_query
     
     def preprocess(self):
-        for i in self.random_reviews:
-            with open ("./output/"+i, 'rt', encoding='utf-8')  as file:
+        # documents = self.random_reviews if self.process_query else self.random_reviews 
+        for output_review in self.random_reviews:
+            with open (self.dir + "/" + output_review, 'rt', encoding='utf-8')  as file:
             
                 word_counts = {}
                 sum_values = 0
@@ -36,9 +40,6 @@ class TextMining:
                     word_counts[word] = aux 
                     
                 self.tf.append(word_counts)
-
-    def top_ten_reviews(self):
-        pass
         
     
     def tf_function(self, frequency_list):
@@ -60,14 +61,22 @@ class TextMining:
         aux = sorted(word_df.items(), key=lambda item:item[1])
         aux.reverse()
         sorted_dict = dict(aux)
-        print("DF: \n", sorted_dict) 
+        df = pd.DataFrame(aux)
+        print("DF: \n", df) 
         return sorted_dict
-
+    
+    def top_ten_reviews(self, sorted_dict):
+        
+        top_ten_words = dict(list(sorted_dict.items())[:10])
+        # top_10 = dict(sorted(sorted_dict.items(), key=lambda item: item[1], reverse=True)[:10])
+        for key, value in sorted_dict.items():
+            print("{:<8} {:<15}".format(key, value))
+        return top_ten_words
 
     def idf_function(self, sorted_dict):
         idf_dict = {}
         for word, value in sorted_dict.items():
-            idf_value = math.log(len(self.random_reviews)/value) #logaritmo natural
+            idf_value = math.log(len(self.random_reviews)/value, 10) 
             idf_dict[word] = idf_value 
         
         self.idf.append(idf_dict)
@@ -98,14 +107,16 @@ class TextMining:
         return tf_idf_norm
 
     def run(self):
+
         self.preprocess()
         tf = self.tf_function(self.tf)
         df = self.df_function(tf)
+        # top_ten = self.top_ten_reviews(df)
         idf = self.idf_function(df)
         tf_idf = self.tf_idf_function(tf, idf)
         tf_idf_normalized = self.tf_idf_normalized_function(tf_idf)
+
+
+
     
-if __name__ == '__main__':
-    t = TextMining("./output") 
     
-    t.run()
