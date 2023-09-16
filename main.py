@@ -1,8 +1,6 @@
 from preprocessing import Preprocessor
 from text_frecuency import TextMining
 import os
-import subprocess
-import multiprocessing
 import random 
 
 input_dir = './text/reviews'
@@ -23,13 +21,7 @@ if __name__ == '__main__':
     sample_reviews = random.sample(files,100)
     print(sample_reviews)
 
-    threads = []
-    output_num = 0
     for file in sample_reviews:
-        output_path = "".join(["./output/", str(output_num), ".txt"])
-        #print(output_path)
+        output_path = "".join(["./output/", file[-10:-4], "_output", ".txt"])
         run_mrjob(file, output_path)
-        # thread = multiprocessing.Process(target=run_mrjob, args=(file, output_path))
-        # threads.append(thread)
-        # thread.start()
-        output_num += 1
+
