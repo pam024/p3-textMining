@@ -1,34 +1,25 @@
 import os
-import random 
 import numpy as np 
-import re
 import pandas as pd
-
+import math
 
 class TextMining:
     
     def __init__(self, path_files):        
+        # self.random_reviews = os.listdir(path_files)[1:]
         self.random_reviews = os.listdir(path_files)
-        
-    # def random_review(self):
-    #     #random reviews
-    #     reviews = []        
-    #     reviews = os.listdir("./text/reviews")
-
-    #     self.random_reviews = random.sample(reviews, 100)        
+        self.tf = []
+        self.df = []
+        self.idf = []
+        self.tf_idf_list = []
+        self.dir = path_files
+        # self.process_query = process_query
     
-    #     return self.random_reviews
-    
-    #funcion calculos
-    def calculations(self):
-        tf = []
-        df = []
-        idf = []
-        tf_idf = []
-        
-        for i in self.random_reviews:
-            with open ("./output/"+i, 'rt', encoding='utf-8')  as file:
-                
+    def preprocess(self):
+        # documents = self.random_reviews if self.process_query else self.random_reviews 
+        for output_review in self.random_reviews:
+            with open (self.dir + "/" + output_review, 'rt', encoding='utf-8')  as file:
+            
                 word_counts = {}
                 sum_values = 0
                 
@@ -37,12 +28,7 @@ class TextMining:
                     if len(parts) < 2:
                         continue
                     key, value = parts
-                    
-                    # if key in self.result:
-                    #     self.result[key] += int(value)
-                    # else:
-                    #     self.result[key] = int(value)
-                
+                 
                     sum_values += int(value)
                                         
                     # Almacena el conteo para esta palabra
@@ -53,33 +39,84 @@ class TextMining:
                     aux = word_counts[word] / sum_values                        
                     word_counts[word] = aux 
                     
-                tf.append(word_counts)
+                self.tf.append(word_counts)
         
-            
-        dt_tf = pd.DataFrame(tf)
+    
+    def tf_function(self, frequency_list):
+        dt_tf = pd.DataFrame(frequency_list)
         dt_tf = dt_tf.fillna(0)
-        print(dt_tf)
-                            
-                
-        #print(corpus)
-        #print(i)
         
-        #print("Words len:", len(words))
+        dict_tf = dict(dt_tf)
+        print("TF: \n", dt_tf)
+        return dt_tf
+        
+    def df_function(self, dt_tf):
+        doc_set = set(dt_tf.columns)
+        word_df = {word: 0 for word in doc_set}     
+        for i in self.tf: 
+            for j in doc_set:
+                if j in i:
+                    word_df[j] += 1
+
+        aux = sorted(word_df.items(), key=lambda item:item[1])
+        aux.reverse()
+        sorted_dict = dict(aux)
+        df = pd.DataFrame(aux)
+        print("DF: \n", df) 
+        return sorted_dict
+    
+    def top_ten_reviews(self, sorted_dict):
+        
+        top_ten_words = dict(list(sorted_dict.items())[:10])
+        # top_10 = dict(sorted(sorted_dict.items(), key=lambda item: item[1], reverse=True)[:10])
+        for key, value in sorted_dict.items():
+            print("{:<8} {:<15}".format(key, value))
+        return top_ten_words
+
+    def idf_function(self, sorted_dict):
+        idf_dict = {}
+        for word, value in sorted_dict.items():
+            idf_value = math.log(len(self.random_reviews)/value, 10) 
+            idf_dict[word] = idf_value 
+        
+        self.idf.append(idf_dict)
+        df_idf = pd.DataFrame(self.idf) 
+        print("IDF: \n", df_idf)
+        return idf_dict
+        
+
+    def tf_idf_function(self, dt_tf, idf_dict):
+        lista = dt_tf.to_dict(orient='records')
+        
+        for i in lista:
+            tf_idf = {}
+            for key,value in i.items():
+                tf_idf[key] = i[key]*idf_dict[key]
             
-        #print('The words in the corpus: \n', words_set) 
+            self.tf_idf_list.append(tf_idf)
+        
+        df_tf_idf = pd.DataFrame(self.tf_idf_list)
+        print("TF-IDF: \n", df_tf_idf)
+        return df_tf_idf
     
-    #print top 10 words
+    def tf_idf_normalized_function(self, df_tf_idf):
+        norm = np.linalg.norm(df_tf_idf.values,axis=1)
+        tf_idf_norm = (df_tf_idf.T/norm).T
+            
+        print("NORM: \n", tf_idf_norm)
+        return tf_idf_norm
+
+    def run(self):
+
+        self.preprocess()
+        tf = self.tf_function(self.tf)
+        df = self.df_function(tf)
+        # top_ten = self.top_ten_reviews(df)
+        idf = self.idf_function(df)
+        tf_idf = self.tf_idf_function(tf, idf)
+        tf_idf_normalized = self.tf_idf_normalized_function(tf_idf)
+
+
+
     
-if __name__ == '__main__':
-    t = TextMining("./output") 
     
-    #review_len = t.random_review()
-    #print(len(review_len))
-    #print(review_len)
-    
-    t.calculations()
-    
-    #p.mapper()
-    #print(p.mapper())
-    
-    #p.reducer()
