@@ -3,6 +3,8 @@ import numpy as np
 import pandas as pd
 import math
 import re
+import matplotlib.pyplot as plt
+from sklearn.metrics.pairwise import cosine_similarity
 
 class TextMining:
     
@@ -147,10 +149,12 @@ class TextMining:
 
 
     def cosine_similarity(self, document_vector):
-        dot_product = self.tf_idf_norm.dot(document_vector)
-        print(dot_product)
-        return dot_product
-
+        # dot_product = self.tf_idf_norm.dot(document_vector)
+        # print(dot_product)
+        # return dot_product
+        cosine_sim_matrix = cosine_similarity(self.tf_idf_norm, document_vector)
+        print(cosine_sim_matrix)
+        return cosine_sim_matrix
 
 
     def run(self):
@@ -162,11 +166,16 @@ class TextMining:
         idf = self.idf_function(df)
         tf_idf = self.tf_idf_function(tf, idf)
         tf_idf_normalized = self.tf_idf_normalized_function(tf_idf)
-        query = self.tf_idf_query_normalized_function("betty character atmosphere cannot color")
+        #query = self.tf_idf_query_normalized_function("betty character atmosphere cannot color")
         # self.cosine_similarity(query)
     
-        self.cosine_similarity(tf_idf_normalized.T)
-        
+        similarity_matrix = self.cosine_similarity(tf_idf_normalized)
+
+        plt.matshow(similarity_matrix)
+        plt.set_cmap('Blues')
+        plt.colorbar()
+        plt.show()
+
 
 
     
