@@ -4,12 +4,11 @@ import pandas as pd
 import math
 import re
 import matplotlib.pyplot as plt
-# from sklearn.metrics.pairwise import cosine_similarity
 
 class TextMining:
     
     def __init__(self, path_files):        
-        # self.random_reviews = os.listdir(path_files)[1:]
+
         self.random_reviews = os.listdir(path_files)
         self.tf = []
         self.df = []
@@ -18,10 +17,8 @@ class TextMining:
         self.dir = path_files
         self.tf_idf_norm = []
         self.idf_dict = {}
-        # self.process_query = process_query
     
     def preprocess(self):
-        # documents = self.random_reviews if self.process_query else self.random_reviews 
         for output_review in self.random_reviews:
             with open (self.dir + "/" + output_review, 'rt', encoding='utf-8')  as file:
             
@@ -45,12 +42,13 @@ class TextMining:
                     word_counts[word] = aux 
                     
                 self.tf.append(word_counts)
-        
     
     def tf_function(self, frequency_list):
         dt_tf = pd.DataFrame(frequency_list)
         dt_tf = dt_tf.fillna(0)
-        dt_tf.to_csv('./tables/dt_tf_table.csv', sep=',', index=False, encoding='utf-8')
+        dt_tf.index = self.random_reviews
+        dt_tf.to_csv('./tables/dt_tf_table.csv', sep=',', index=True, encoding='utf-8')
+
         
         dict_tf = dict(dt_tf)
         print("TF: \n", dt_tf)
@@ -67,15 +65,14 @@ class TextMining:
         aux = sorted(word_df.items(), key=lambda item:item[1])
         aux.reverse()
         sorted_dict = dict(aux)
-        df = pd.DataFrame(aux)
-        df.to_csv('./tables/dt_table.csv', sep=',', index=False, encoding='utf-8')
+        df = pd.DataFrame(aux)    
+        df.to_csv('./tables/dt_table.csv', sep=',', index=True, encoding='utf-8')
         print("DF: \n", df) 
         return sorted_dict
     
     def top_ten_reviews(self, sorted_dict):
         
         top_ten_words = dict(list(sorted_dict.items())[:10])
-        # top_10 = dict(sorted(sorted_dict.items(), key=lambda item: item[1], reverse=True)[:10])
         print("Top Ten Words from Dataset")
         for key, value in top_ten_words.items():
             print("{:<8} {:<15}".format(key, value))
@@ -90,7 +87,7 @@ class TextMining:
         
         self.idf.append(self.idf_dict)
         df_idf = pd.DataFrame(self.idf)
-        df_idf.to_csv('./tables/df_idf_table.csv', sep=',', index=False, encoding='utf-8')
+        df_idf.to_csv('./tables/df_idf_table.csv', sep=',', index=True, encoding='utf-8')
         print("IDF: \n", df_idf)
         return self.idf_dict
         
@@ -106,14 +103,15 @@ class TextMining:
             self.tf_idf_list.append(tf_idf)
         
         df_tf_idf = pd.DataFrame(self.tf_idf_list)
-
+        df_tf_idf.index = self.random_reviews
         print("TF-IDF: \n", df_tf_idf)
         return df_tf_idf
     
     def tf_idf_normalized_function(self, df_tf_idf):
         norm = np.linalg.norm(df_tf_idf.values,axis=1)
         self.tf_idf_norm = (df_tf_idf.T/norm).T
-        self.tf_idf_norm.to_csv('./tables/tf_idf_norm_table.csv', sep=',', index=False, encoding='utf-8')
+        self.tf_idf_norm.index = self.random_reviews
+        self.tf_idf_norm.to_csv('./tables/tf_idf_norm_table.csv', sep=',', index=True, encoding='utf-8')
         print("NORM: \n", self.tf_idf_norm)
         return self.tf_idf_norm
 

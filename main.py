@@ -15,17 +15,17 @@ def run_mrjob( input_path, output_path):
 
 if __name__ == '__main__':
 
-    # files = [os.path.join(input_dir, file)
-    #             for file in os.listdir(input_dir) if file.endswith('.txt')]
+    files = [os.path.join(input_dir, file)
+                for file in os.listdir(input_dir) if file.endswith('.txt')]
 
-    # sample_reviews = random.sample(files,100)
-    # print(sample_reviews)
+    sample_reviews = random.sample(files,100)
+    print(sample_reviews)
 
-    # counter = 0
-    # for file in sample_reviews:
-    #     output_path = "".join(["./output/", str(counter), "_output", ".txt"])
-    #     run_mrjob(file, output_path)
-    #     counter += 1
+    counter = 0
+    for file in sample_reviews:
+        output_path = "".join(["./output/", str(counter), "_output", ".txt"])
+        run_mrjob(file, output_path)
+        counter += 1
     
 
     t = TextMining("./output")
