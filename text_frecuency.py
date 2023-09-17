@@ -2,6 +2,7 @@ import os
 import numpy as np 
 import pandas as pd
 import math
+import re
 
 class TextMining:
     
@@ -13,6 +14,8 @@ class TextMining:
         self.idf = []
         self.tf_idf_list = []
         self.dir = path_files
+        self.tf_idf_norm = []
+        self.idf_dict = {}
         # self.process_query = process_query
     
     def preprocess(self):
@@ -74,15 +77,15 @@ class TextMining:
         return top_ten_words
 
     def idf_function(self, sorted_dict):
-        idf_dict = {}
+        self.idf_dict = {}
         for word, value in sorted_dict.items():
             idf_value = math.log(len(self.random_reviews)/value, 10) 
-            idf_dict[word] = idf_value 
+            self.idf_dict[word] = idf_value 
         
-        self.idf.append(idf_dict)
+        self.idf.append(self.idf_dict)
         df_idf = pd.DataFrame(self.idf) 
         print("IDF: \n", df_idf)
-        return idf_dict
+        return self.idf_dict
         
 
     def tf_idf_function(self, dt_tf, idf_dict):
@@ -101,10 +104,54 @@ class TextMining:
     
     def tf_idf_normalized_function(self, df_tf_idf):
         norm = np.linalg.norm(df_tf_idf.values,axis=1)
-        tf_idf_norm = (df_tf_idf.T/norm).T
+        self.tf_idf_norm = (df_tf_idf.T/norm).T
             
-        print("NORM: \n", tf_idf_norm)
-        return tf_idf_norm
+        print("NORM: \n", self.tf_idf_norm)
+        return self.tf_idf_norm
+
+    def tf_idf_query_normalized_function(self, query):
+        
+        query_vector = self.tf_idf_norm.T.iloc[:,0]
+        
+        for word, value in query_vector.items():
+            query_vector.at[word] = 0
+
+        sum_values = 0
+        w_frequency = {}
+        for word in query.split():
+            word = word.lower()
+            word = re.sub(r"(@\[A-Za-z0-9]+)|([^0-9A-Za-z \t])|(\w+:\/\/\S+)|^rt|http.+?", "", word)
+            sum_values += 1
+
+            if word not in w_frequency:
+                w_frequency[word] = 0
+            w_frequency[word] += 1
+        # Divide cada valor por el total de valores
+        for word in w_frequency:
+            aux = w_frequency[word] / sum_values                        
+            w_frequency[word] = aux
+
+        for key, value in w_frequency.items():
+            if key in query_vector:
+                query_vector.at[key] = value * self.idf_dict[key]
+
+
+        # Calculate the magnitude (length) of the vector
+        magnitude = np.linalg.norm(query_vector)
+
+        # Normalize the vector
+        norm_query_vector = query_vector / magnitude
+
+        print (norm_query_vector)
+        return norm_query_vector
+
+
+    def cosine_similarity(self, document_vector):
+        dot_product = self.tf_idf_norm.dot(document_vector)
+        print(dot_product)
+        return dot_product
+
+
 
     def run(self):
 
@@ -115,7 +162,11 @@ class TextMining:
         idf = self.idf_function(df)
         tf_idf = self.tf_idf_function(tf, idf)
         tf_idf_normalized = self.tf_idf_normalized_function(tf_idf)
-
+        query = self.tf_idf_query_normalized_function("betty character atmosphere cannot color")
+        # self.cosine_similarity(query)
+    
+        self.cosine_similarity(tf_idf_normalized.T)
+        
 
 
     
